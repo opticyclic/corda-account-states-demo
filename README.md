@@ -36,6 +36,13 @@ These accounts are the standard Corda Accounts SDK version.
     flow start CreateAccount name: 'Bank1'
     flow start CreateAccount name: 'Agent1'
 
+**Create Custom Accounts**
+
+These accounts will have an extra property denoting the "type" of account.
+
+    flow start CreateCorp companyName: 'Bank1', companyType: 'BANK'
+    flow start CreateCorp companyName: 'Agent1', companyType: 'AGENT'
+
 **List Accounts on the node**
 
     flow start AllAccounts
