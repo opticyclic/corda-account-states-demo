@@ -2,9 +2,15 @@
 
 Demonstrate how to add properties to Corda Account states.
 
-This is a slightly modified version of the Corda Samples for transferring IOUs that uses accounts.
-
+This is a slightly modified version of the Corda Samples for transferring IOUs, except that this uses accounts.
 The demo is designed to run with all the accounts on a single node to simplify the flows.
+
+A new type of Account is created (called _Corp_) with a property that determines the company type (BANK or AGENT in this case).
+
+The flow to create the custom account (`CreateCorp`) first creates a Corda Account, then creates a new `Corp` state with the newly created Corda account as a property.
+
+You will see that you can create the IOUs with both the "normal" SDK accounts and also the new custom accounts.
+The project doesn't demonstrate accessing the company type, although it is fairly simple to do as long as you pass a `Corp` type to your function and not an `AccountInfo` type. 
 
 ## Debugging
 
@@ -12,9 +18,9 @@ Check that the `tools.jar` has been added to your project JDK classpath and that
 
 ## Local Testing
 
-For development, we can let Hibernate create the tables and manage the schema.
-
 The accounts SDK _also_ has a custom schema, so `runSchemaMigration = true` is added to the `deployNodes` gradle task in order to create those tables.
+
+For development, we can let Hibernate create the tables and manage the schema.
 
 Start the nodes with:
 
@@ -39,6 +45,8 @@ These accounts are the standard Corda Accounts SDK version.
 **Create Custom Accounts**
 
 These accounts will have an extra property denoting the "type" of account.
+
+_If you have already created the standard accounts you will have to use different names to the ones below as they will clash._
 
     flow start CreateCorp companyName: 'Bank1', companyType: 'BANK'
     flow start CreateCorp companyName: 'Agent1', companyType: 'AGENT'
