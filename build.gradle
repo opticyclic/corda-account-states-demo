@@ -53,6 +53,9 @@ apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordapp'
 apply plugin: 'net.corda.plugins.cordformation'
 
+//The root project shouldn't be creating a jar of its own
+jar.enabled = false
+
 dependencies {
   cordaCompile "net.corda:corda-node-api:$corda_release_version"
 
