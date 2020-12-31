@@ -8,26 +8,26 @@ import com.github.opticyclic.corda.demo.accounts.states.CorpInfo
 import com.r3.corda.lib.accounts.workflows.flows.CreateAccount
 import com.r3.corda.lib.accounts.workflows.flows.RequestKeyForAccount
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
-import net.corda.core.transactions.SignedTransaction
+import net.corda.core.flows.StartableByService
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 
-
 /**
- * Create a custom Corda account with a property that defines the "type" of company
+ * A flow to create a custom Corda account with a property that defines the "type" of company
  * @param companyName the company name
  * @param companyType the [type][AccountType] of company
- * @return [SignedTransaction]
  * @see CorpInfo
  */
+@StartableByService
 @StartableByRPC
 class CreateCorp(
     private val companyName: String,
     private val companyType: String
-) : FlowLogic<SignedTransaction>() {
+) : FlowLogic<StateAndRef<CorpInfo>>() {
 
     /*
      * The progress tracker checkpoints each stage of the flow and outputs the specified messages when each checkpoint is reached.
@@ -52,7 +52,7 @@ class CreateCorp(
     override val progressTracker = tracker()
 
     @Suspendable
-    override fun call(): SignedTransaction {
+    override fun call(): StateAndRef<CorpInfo> {
         progressTracker.currentStep = CREATING
         //Create the Account to link to the output state
         val cordaAccount = subFlow(CreateAccount(companyName))
@@ -76,9 +76,10 @@ class CreateCorp(
         txBuilder.verify(serviceHub)
 
         progressTracker.currentStep = SIGNING
-        val signedNewAccountTx = serviceHub.signInitialTransaction(txBuilder, keysToSignWith)
+        val signedTransaction = serviceHub.signInitialTransaction(txBuilder, keysToSignWith)
 
         progressTracker.currentStep = FINALISING
-        return subFlow(FinalityFlow(signedNewAccountTx, emptyList()))
+        val finalisedTransaction = subFlow(FinalityFlow(signedTransaction, emptyList()))
+        return finalisedTransaction.coreTransaction.outRefsOfType<CorpInfo>().single()
     }
 }
